@@ -1,4 +1,4 @@
-# Codekrypt Injectors
+# Codekrypt Dependency Injector
 
 ## Feature
 - Supports Field Injection using `@Autowire`
