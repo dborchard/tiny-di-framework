@@ -60,3 +60,4 @@ public class CarApplication {
 
 ### TODO
 - Implement Constructor Injection.
+- Fix Diamond Problem DI.
