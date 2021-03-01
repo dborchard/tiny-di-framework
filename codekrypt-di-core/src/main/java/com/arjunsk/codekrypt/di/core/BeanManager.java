@@ -1,6 +1,6 @@
-package com.arjunsk.codekrypt.di.core.core;
+package com.arjunsk.codekrypt.di.core;
 
-import com.arjunsk.codekrypt.di.core.exceptions.BeanFetchException;
+import com.arjunsk.codekrypt.di.exceptions.BeanFetchException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;

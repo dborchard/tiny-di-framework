@@ -1,11 +1,11 @@
-package com.arjunsk.codekrypt.di.core.utils;
+package com.arjunsk.codekrypt.di.utils;
 
-import com.arjunsk.codekrypt.di.core.annotation.Autowire;
-import com.arjunsk.codekrypt.di.core.annotation.PostConstruct;
-import com.arjunsk.codekrypt.di.core.annotation.Qualifier;
-import com.arjunsk.codekrypt.di.core.core.BeanManager;
-import com.arjunsk.codekrypt.di.core.exceptions.BeanInjectException;
-import com.arjunsk.codekrypt.di.core.exceptions.InvokeException;
+import com.arjunsk.codekrypt.di.annotation.Autowire;
+import com.arjunsk.codekrypt.di.core.BeanManager;
+import com.arjunsk.codekrypt.di.annotation.PostConstruct;
+import com.arjunsk.codekrypt.di.annotation.Qualifier;
+import com.arjunsk.codekrypt.di.exceptions.BeanInjectException;
+import com.arjunsk.codekrypt.di.exceptions.InvokeException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;

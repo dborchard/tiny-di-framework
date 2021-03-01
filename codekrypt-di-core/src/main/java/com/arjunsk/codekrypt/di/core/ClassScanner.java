@@ -1,6 +1,6 @@
-package com.arjunsk.codekrypt.di.core.core;
+package com.arjunsk.codekrypt.di.core;
 
-import com.arjunsk.codekrypt.di.core.exceptions.ClassLoadException;
+import com.arjunsk.codekrypt.di.exceptions.ClassLoadException;
 import java.io.File;
 import java.net.URL;
 import java.util.HashSet;

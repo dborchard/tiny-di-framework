@@ -1,7 +1,7 @@
 package com.arjunsk.codekrypt.di.sample.components.horn.impl;
 
-import com.arjunsk.codekrypt.di.core.annotation.Component;
-import com.arjunsk.codekrypt.di.core.annotation.PostConstruct;
+import com.arjunsk.codekrypt.di.annotation.Component;
+import com.arjunsk.codekrypt.di.annotation.PostConstruct;
 import com.arjunsk.codekrypt.di.sample.components.horn.Horn;
 
 @Component

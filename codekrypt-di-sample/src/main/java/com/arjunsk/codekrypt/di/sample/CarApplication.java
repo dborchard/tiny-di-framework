@@ -1,6 +1,6 @@
 package com.arjunsk.codekrypt.di.sample;
 
-import com.arjunsk.codekrypt.di.core.core.CodekryptInjector;
+import com.arjunsk.codekrypt.di.core.CodekryptInjector;
 
 public class CarApplication {
 

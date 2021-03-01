@@ -1,4 +1,4 @@
-package com.arjunsk.codekrypt.di.core.exceptions;
+package com.arjunsk.codekrypt.di.exceptions;
 
 public class BeanInitiateException extends RuntimeException {
 

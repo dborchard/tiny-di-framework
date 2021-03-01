@@ -1,8 +1,8 @@
-package com.arjunsk.codekrypt.di.core.core;
+package com.arjunsk.codekrypt.di.core;
 
-import com.arjunsk.codekrypt.di.core.annotation.Component;
-import com.arjunsk.codekrypt.di.core.exceptions.BeanInitiateException;
-import com.arjunsk.codekrypt.di.core.utils.BeanOperationsUtils;
+import com.arjunsk.codekrypt.di.annotation.Component;
+import com.arjunsk.codekrypt.di.exceptions.BeanInitiateException;
+import com.arjunsk.codekrypt.di.utils.BeanOperationsUtils;
 import java.util.Set;
 import java.util.stream.Collectors;
 

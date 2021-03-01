@@ -1,4 +1,4 @@
-package com.arjunsk.codekrypt.di.core.annotation;
+package com.arjunsk.codekrypt.di.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
