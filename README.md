@@ -58,6 +58,13 @@ public class CarApplication {
 }
 ```
 
+### Output
+````text
+Air Horn Initialized. 
+Air Horn Implementation called.
+````
+
+
 ### TODO
 - Implement Constructor Injection.
 - Fix Diamond Problem DI.
