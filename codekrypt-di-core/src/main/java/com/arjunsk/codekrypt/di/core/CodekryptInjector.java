@@ -12,6 +12,11 @@ public class CodekryptInjector {
 
   private CodekryptInjector() {}
 
+  /**
+   * Entry point for Codekrypt Injector.
+   *
+   * @param mainClass Main class of the program.
+   */
   public static void run(Class<?> mainClass) {
 
     // 1. Get all the Component classes
