@@ -1,7 +1,7 @@
 # Codekrypt Dependency Injector
 
 ## Feature
-- Supports Field Injection using `@Autowire`
+- Supports Field Injection using `@Autowire` & `@Qualifier`
 - Supports `@PostConstruct` 
 
 ## Usage
