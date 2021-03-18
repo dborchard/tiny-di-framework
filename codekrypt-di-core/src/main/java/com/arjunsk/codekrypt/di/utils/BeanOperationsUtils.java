@@ -1,9 +1,9 @@
 package com.arjunsk.codekrypt.di.utils;
 
 import com.arjunsk.codekrypt.di.annotation.Autowire;
-import com.arjunsk.codekrypt.di.core.BeanManager;
 import com.arjunsk.codekrypt.di.annotation.PostConstruct;
 import com.arjunsk.codekrypt.di.annotation.Qualifier;
+import com.arjunsk.codekrypt.di.core.BeanManager;
 import com.arjunsk.codekrypt.di.exceptions.BeanInjectException;
 import com.arjunsk.codekrypt.di.exceptions.InvokeException;
 import java.lang.reflect.Field;
@@ -51,10 +51,16 @@ public final class BeanOperationsUtils {
             beanManager.getBeanInstance(
                 injectableField.getType(), injectableField.getName(), qualifier);
 
+        // Recursive calling. We call invokeAutowire on the Field class to ensure that the @Autowire
+        // inside field class is resolved before hand. [Snip 1]
+        invokeAutowire(beanManager, injectableField.getClass(), fieldInstance);
+
+        // If the Field Class @Autowire's are resolved, we set field value as the object. [Snip 2]
         injectableField.setAccessible(true);
         injectableField.set(classInstance, fieldInstance);
 
-        invokeAutowire(beanManager, injectableField.getClass(), fieldInstance);
+        // NOTE: since we are currently only supporting setter injection, it really doesn't matter
+        // if we interchange [snip 1] & [snip 2].
       }
 
       // 3. Post Construct call.
