@@ -67,5 +67,5 @@ Air Horn Implementation called.
 
 ### TODO
 - Implement Constructor Injection.
-- Fix Diamond Problem DI.
-- Fix class load in JAR (after mvn package).
+- Fix multiple interface bean resolution.
+- Fix class scanning inside fat JAR (ie after mvn clean install).
