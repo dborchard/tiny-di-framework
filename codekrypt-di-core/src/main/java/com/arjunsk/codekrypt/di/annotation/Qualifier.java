@@ -9,8 +9,8 @@ import java.lang.annotation.Target;
  * This is used to resolve Bean conflicts. If multiple implementations are available for an
  * interface, then we use @Qualifier(value="ClassName") to resolve the conflict.
  */
+@Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
 public @interface Qualifier {
   String value() default "";
 }
