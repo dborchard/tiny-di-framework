@@ -60,22 +60,27 @@ public class BeanManager {
   }
 
   /**
-   * Returns Implementation class for an interface.
+   * Returns Implementation class for an interface/class.
    *
-   * @param interfaceClass interface class
+   * @param inputClass interface class
    * @param fieldName @Autowire field name
    * @param qualifier @Qualifier value
    * @return Implementation class of the interface.
    */
-  private Class<?> getImplementationClass(
-      Class<?> interfaceClass, String fieldName, String qualifier) {
+  public Class<?> getImplementationClass(Class<?> inputClass, String fieldName, String qualifier) {
 
+    /* 1. if this is a concrete class, then return the same class.*/
+    if (!inputClass.isInterface()) {
+      return inputClass;
+    }
+
+    /* 2. Else if it is an interface, return the implementation class. */
     String errorMessage;
 
     // Get all the implementation classes for the interface.
     Set<Entry<Class<?>, Class<?>>> implementationClasses =
         beanInheritanceMap.entrySet().stream()
-            .filter(entry -> entry.getValue() == interfaceClass)
+            .filter(entry -> entry.getValue() == inputClass)
             .collect(Collectors.toSet());
 
     if (implementationClasses.isEmpty()) {
@@ -97,7 +102,7 @@ public class BeanManager {
         errorMessage =
             String.format(
                 "%s implementations of %s found. Use @Qualifier to resolve it.",
-                implementationClasses.size(), interfaceClass.getName());
+                implementationClasses.size(), inputClass.getName());
       }
     }
 
