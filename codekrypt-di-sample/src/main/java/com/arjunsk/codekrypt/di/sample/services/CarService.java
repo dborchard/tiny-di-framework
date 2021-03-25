@@ -6,17 +6,17 @@ import com.arjunsk.codekrypt.di.annotation.PostConstruct;
 import com.arjunsk.codekrypt.di.annotation.Qualifier;
 import com.arjunsk.codekrypt.di.sample.components.horn.Horn;
 
+/** Constructor Injection. */
 @Component
-public class Car {
+public class CarService {
 
+  private final Horn horn;
   private int odometerReading;
 
-  @Qualifier(value = "HornAirImpl")
   @Autowire
-  private Horn horn;
-
-  public Car() {
+  public CarService(@Qualifier("HornAirImpl") Horn horn) {
     odometerReading = 0;
+    this.horn = horn;
   }
 
   public void incrementOdometer() {
@@ -25,6 +25,7 @@ public class Car {
 
   @PostConstruct
   public void honk() {
+    System.out.print("In Car Service: ");
     horn.honk();
   }
 }
