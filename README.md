@@ -2,6 +2,7 @@
 
 ## Feature
 - Supports Field Injection using `@Autowire` & `@Qualifier`
+- Supports `Constructor` Injection.
 - Supports `@PostConstruct` 
 
 ## Usage
@@ -22,10 +23,38 @@ public class HornAirImpl implements Horn {
 }
 ```
 
-> Car.java
+> CarService.java
 ```java
+/** Constructor Injection. */
 @Component
-public class Car {
+public class CarService {
+
+  private final Horn horn;
+  private int odometerReading;
+
+  @Autowire
+  public CarService(@Qualifier("HornAirImpl") Horn horn) {
+    odometerReading = 0;
+    this.horn = horn;
+  }
+
+  public void incrementOdometer() {
+    odometerReading++;
+  }
+
+  @PostConstruct
+  public void honk() {
+    System.out.print("In Car Service: ");
+    horn.honk();
+  }
+}
+```
+
+> TruckService.java
+```java
+/** Field Injection. */
+@Component
+public class TruckService {
 
   private int odometerReading;
 
@@ -33,7 +62,7 @@ public class Car {
   @Autowire
   private Horn horn;
 
-  public Car() {
+  public TruckService() {
     odometerReading = 0;
   }
 
@@ -43,29 +72,32 @@ public class Car {
 
   @PostConstruct
   public void honk() {
+    System.out.print("In Truck Service: ");
     horn.honk();
   }
 }
 ```
+ 
 
-> CarApplication.java
+> VehicleApplication.java
 ```java
-public class CarApplication {
+public class VehicleApplication {
 
   public static void main(String[] args) {
-    CodekryptInjector.run(CarApplication.class);
+    CodekryptInjector.run(VehicleApplication.class);
   }
 }
 ```
 
 ### Output
 ````text
-Air Horn Initialized. 
-Air Horn Implementation called.
+In Truck Service: Air Horn Implementation called.
+Air Horn Initialized.
+In Car Service: Air Horn Implementation called.
 ````
 
 
 ### TODO
-- Implement Constructor Injection.
+- ~~Implement Constructor Injection.~~
 - Fix multiple interface bean resolution.
 - Fix class scanning inside fat JAR (ie after mvn clean install).

@@ -54,8 +54,12 @@ public class CodekryptInjector {
     // 3. Instantiate all the component class.
     try {
       for (Class<?> componentClass : componentClasses) {
-        // For @Component class, Qualifier is null.
-        // For @Autowire Field, Qualifier is not null.
+        /**
+         * 1. For @Component class, Qualifier is null.
+         *
+         * <p>2.For @Autowire Field, Qualifier is not null. (Passed via {@link
+         * #initComponentClass(Class, String)} })
+         */
         initComponentClass(componentClass, null);
       }
     } catch (Exception ex) {
@@ -69,52 +73,60 @@ public class CodekryptInjector {
 
     boolean isConstructorInjection = false;
 
+    // Used for class.newInstance(class[],objects[])
     List<Class<?>> argClassList = new LinkedList<>();
     List<Object> argObjectList = new ArrayList<>();
 
     for (Constructor<?> constructor : componentClass.getConstructors()) {
+
+      // Fail if we have, more than 1 @Autowire Constructor.
+      if (isConstructorInjection) {
+        throw new IllegalArgumentException("Only supports 1 Autowire constructor.");
+      }
+
       if (constructor.isAnnotationPresent(Autowire.class)) {
 
         isConstructorInjection = true;
 
-        for (Parameter parameter : constructor.getParameters()) {
-          argClassList.add(parameter.getType());
+        for (Parameter field : constructor.getParameters()) {
+          argClassList.add(field.getType());
 
+          // Getting @Qualifier attribute from the Field.
           String qualifierVal =
-              parameter.isAnnotationPresent(Qualifier.class)
-                  ? parameter.getAnnotation(Qualifier.class).value()
+              field.isAnnotationPresent(Qualifier.class)
+                  ? field.getAnnotation(Qualifier.class).value()
                   : null;
 
-          // Initializing the object for the @Autowire Field.
-          Object fieldArgumentObject = initComponentClass(parameter.getType(), qualifierVal);
+          // Create object for this @Autowire Field.
+          Object fieldArgumentObject = initComponentClass(field.getType(), qualifierVal);
           argObjectList.add(fieldArgumentObject);
         }
       }
     }
 
-    // Once the dependent fields are initialized, it is ready to be passed to the component
-    // constructor.
-
     Object componentClassObject;
 
     if (!isConstructorInjection) {
 
-      // 3.1 Here it will be interface, ie @Autowire Field. So get the correct impl class and create
-      // the object.
-      Class<?> implementationClass =
-          beanManager.getImplementationClass(componentClass, componentClass.getName(), qualifier);
+      // 3.1 Here it will be interface, ie @Autowire Field. So we get the correct bean from the
+      // IoC container (based on qualifier if any).
 
-      componentClassObject = implementationClass.newInstance();
+      // NOTE: It will create an instance if not present and add it to the IoC container.
+      componentClassObject =
+          beanManager.getBeanInstance(componentClass, componentClass.getName(), qualifier);
+
     } else {
 
-      // 3.2 Here it will be @component class, with constructor injection.
+      // 3.2 Here it will be @Component class, with constructor injection.
+
+      // NOTE: Here we are explicitly adding the component instance to the IoC container.
       componentClassObject =
           componentClass
               .getDeclaredConstructor(argClassList.toArray(new Class[0]))
               .newInstance(argObjectList.toArray());
-    }
 
-    beanManager.addClassInstancesMapping(componentClass, componentClassObject);
+      beanManager.addClassInstancesMapping(componentClass, componentClassObject);
+    }
 
     // 3.2 Autowire + recursion.
     BeanOperationsUtils.invokeAutowire(beanManager, componentClass, componentClassObject);

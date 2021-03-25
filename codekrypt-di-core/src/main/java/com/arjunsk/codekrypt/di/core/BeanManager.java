@@ -62,12 +62,12 @@ public class BeanManager {
   /**
    * Returns Implementation class for an interface/class.
    *
-   * @param inputClass interface class
+   * @param inputClass interface/concrete class
    * @param fieldName @Autowire field name
    * @param qualifier @Qualifier value
    * @return Implementation class of the interface.
    */
-  public Class<?> getImplementationClass(Class<?> inputClass, String fieldName, String qualifier) {
+  private Class<?> getImplementationClass(Class<?> inputClass, String fieldName, String qualifier) {
 
     /* 1. if this is a concrete class, then return the same class.*/
     if (!inputClass.isInterface()) {

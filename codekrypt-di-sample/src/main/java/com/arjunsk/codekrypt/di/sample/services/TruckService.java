@@ -12,7 +12,7 @@ public class TruckService {
 
   private int odometerReading;
 
-  @Qualifier(value = "HornElectricImpl")
+  @Qualifier(value = "HornAirImpl")
   @Autowire
   private Horn horn;
 
@@ -26,6 +26,7 @@ public class TruckService {
 
   @PostConstruct
   public void honk() {
+    System.out.print("In Truck Service: ");
     horn.honk();
   }
 }

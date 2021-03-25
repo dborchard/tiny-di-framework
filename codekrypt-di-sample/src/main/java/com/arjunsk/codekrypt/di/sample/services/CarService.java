@@ -25,6 +25,7 @@ public class CarService {
 
   @PostConstruct
   public void honk() {
+    System.out.print("In Car Service: ");
     horn.honk();
   }
 }
