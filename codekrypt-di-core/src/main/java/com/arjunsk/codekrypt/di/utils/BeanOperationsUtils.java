@@ -30,7 +30,10 @@ public final class BeanOperationsUtils {
     // 1. Get all the @Autowire Fields.
     List<Field> fieldList = new ArrayList<>();
     fieldList.addAll(Arrays.asList(implementationClass.getDeclaredFields()));
-    fieldList.addAll(Arrays.asList(implementationClass.getSuperclass().getDeclaredFields()));
+
+    // 2. Get the fields from Super Class if it exist.
+    Class<?> superclass = implementationClass.getSuperclass();
+    if (superclass != null) fieldList.addAll(Arrays.asList(superclass.getDeclaredFields()));
 
     List<Field> injectableFieldList =
         fieldList.stream()
