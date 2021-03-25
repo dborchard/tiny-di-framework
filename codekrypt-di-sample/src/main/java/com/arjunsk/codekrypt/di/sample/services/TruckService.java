@@ -6,6 +6,7 @@ import com.arjunsk.codekrypt.di.annotation.PostConstruct;
 import com.arjunsk.codekrypt.di.annotation.Qualifier;
 import com.arjunsk.codekrypt.di.sample.components.horn.Horn;
 
+/** Field Injection. */
 @Component
 public class TruckService {
 
