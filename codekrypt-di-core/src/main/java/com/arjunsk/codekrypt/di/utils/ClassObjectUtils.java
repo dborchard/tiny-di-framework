@@ -13,9 +13,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public final class BeanOperationsUtils {
+public final class ClassObjectUtils {
 
-  private BeanOperationsUtils() {}
+  private ClassObjectUtils() {}
 
   /**
    * Inject instance to @Autowire Field.
@@ -42,7 +42,7 @@ public final class BeanOperationsUtils {
 
     try {
 
-      // 2. Inject ClassInstance to all the Autowire fields.
+      // 3. Inject ClassInstance to all the Autowire fields.
       for (Field injectableField : injectableFieldList) {
 
         String qualifier =
@@ -54,20 +54,16 @@ public final class BeanOperationsUtils {
             beanManager.getBeanInstance(
                 injectableField.getType(), injectableField.getName(), qualifier);
 
-        // Recursive calling. We call invokeAutowire on the Field class to ensure that the @Autowire
-        // inside field class is resolved before hand. [Snip 1]
-        invokeAutowire(beanManager, injectableField.getClass(), fieldInstance);
+        Class<? extends Field> fieldClass = injectableField.getClass();
 
-        // If the Field Class @Autowire's are resolved, we set field value as the object. [Snip 2]
+        // Recursive calling. We call invokeAutowire on the Field class to ensure that the @Autowire
+        // inside field class is resolved before hand.
+        invokeAutowire(beanManager, fieldClass, fieldInstance);
+
+        // 4. If the Field Class @Autowire's are resolved, we set field value as the object.
         injectableField.setAccessible(true);
         injectableField.set(classInstance, fieldInstance);
-
-        // NOTE: since we are currently only supporting setter injection, it really doesn't matter
-        // if we interchange [snip 1] & [snip 2].
       }
-
-      // 3. Post Construct call.
-      invokePostConstruct(implementationClass, classInstance);
 
     } catch (Exception ex) {
       throw new BeanInjectException("Unable to Inject bean", ex);
@@ -77,13 +73,12 @@ public final class BeanOperationsUtils {
   /**
    * Invoke all the post Construct calls.
    *
-   * @param implementationClass @Component Class.
    * @param classInstance Class Instance.
    */
-  private static void invokePostConstruct(Class<?> implementationClass, Object classInstance) {
+  public static void invokePostConstruct(Object classInstance) {
 
     try {
-      for (Method declaredMethod : implementationClass.getDeclaredMethods()) {
+      for (Method declaredMethod : classInstance.getClass().getDeclaredMethods()) {
         if (declaredMethod.isAnnotationPresent(PostConstruct.class)) {
           declaredMethod.invoke(classInstance);
         }

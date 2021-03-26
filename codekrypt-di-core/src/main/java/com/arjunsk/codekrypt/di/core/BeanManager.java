@@ -2,6 +2,7 @@ package com.arjunsk.codekrypt.di.core;
 
 import com.arjunsk.codekrypt.di.exceptions.BeanFetchException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -26,37 +27,73 @@ public class BeanManager {
     beanInheritanceMap.put(componentClass, interfaceClass);
   }
 
-  public void addClassInstancesMapping(Class<?> componentClass, Object componentClassObject) {
-    classInstancesMap.put(componentClass, componentClassObject);
-  }
-
   /**
-   * Fetch Bean Instance based on the input criteria.
+   * Fetch Bean Instance based on the input criteria. (For Beans without constructor injection)
    *
    * @param interfaceClass interface of the @Autowire field.
    * @param fieldName Used for match by field name.
    * @param qualifier Used for match by qualifier name.
-   * @return Object of the class
+   * @return Object of bean class.
    */
   public <T> Object getBeanInstance(
       Class<T> interfaceClass, final String fieldName, final String qualifier) {
+    return getBeanInstance(interfaceClass, fieldName, qualifier, null, null);
+  }
+
+  /**
+   * Fetch Bean Instance based on the input criteria. (For Beans with constructor injection)
+   *
+   * @param interfaceClass interface of the @Autowire field.
+   * @param fieldName Used for match by field name.
+   * @param qualifier Used for match by qualifier name.
+   * @param argClassList list of Classes to instantiate a class with parametrized constructor.
+   * @param argObjectList list of Object to instantiate a class with parametrized constructor.
+   * @return Object of bean class.
+   */
+  public <T> Object getBeanInstance(
+      Class<T> interfaceClass,
+      final String fieldName,
+      final String qualifier,
+      List<Class<?>> argClassList,
+      List<Object> argObjectList) {
 
     Class<?> implementationClass = getImplementationClass(interfaceClass, fieldName, qualifier);
 
-    // If Impl class instance already available, return that.
-    if (classInstancesMap.containsKey(implementationClass))
-      return classInstancesMap.get(implementationClass);
+    Object classInstance;
 
-    // else, create a new instance and insert into map and return the Object.
-    try {
-      synchronized (classInstancesMap) {
-        Object service = implementationClass.newInstance();
-        classInstancesMap.put(implementationClass, service);
-        return service;
+    // 1. If Impl class instance already available, return that.
+    if (classInstancesMap.containsKey(implementationClass)) {
+      classInstance = classInstancesMap.get(implementationClass);
+    } else {
+
+      // 2. else, create a new instance and insert into map and return the Object.
+      try {
+        synchronized (classInstancesMap) {
+          if (argClassList == null || argClassList.isEmpty()) {
+            // 2.1 Create a new Object with empty constructor.
+            classInstance = implementationClass.newInstance();
+          } else {
+
+            // 2.2 Create a new object with parameterized constructor.
+            Class<?>[] argClassArray = argClassList.toArray(new Class[0]);
+            Object[] argObjectArray = argObjectList.toArray();
+
+            classInstance =
+                implementationClass
+                    .getDeclaredConstructor(argClassArray)
+                    .newInstance(argObjectArray);
+          }
+
+          // 3. save to the IoC Map.
+          classInstancesMap.put(implementationClass, classInstance);
+        }
+
+      } catch (Exception ex) {
+        throw new BeanFetchException("Bean Initialization error", ex);
       }
-    } catch (Exception ex) {
-      throw new BeanFetchException("Bean Initialization error", ex);
     }
+    // 4. Return the instance with the flag.
+    return classInstance;
   }
 
   /**
