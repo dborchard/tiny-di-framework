@@ -56,6 +56,8 @@ public class CodekryptInjector {
         // Create a bean
         Object beanClassObject = initBeanClass(componentClass, null);
 
+        // TODO: Fix post-construct invocation order.
+
         // Post Construct call.
         ClassObjectUtils.invokePostConstruct(beanClassObject);
       }
