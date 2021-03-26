@@ -4,9 +4,8 @@ import com.arjunsk.codekrypt.di.annotation.Autowire;
 import com.arjunsk.codekrypt.di.annotation.Component;
 import com.arjunsk.codekrypt.di.annotation.Qualifier;
 import com.arjunsk.codekrypt.di.exceptions.BeanInitiateException;
-import com.arjunsk.codekrypt.di.utils.BeanOperationsUtils;
+import com.arjunsk.codekrypt.di.utils.ClassObjectUtils;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -54,39 +53,45 @@ public class CodekryptInjector {
     // 3. Instantiate all the component class.
     try {
       for (Class<?> componentClass : componentClasses) {
-        /**
-         * 1. For @Component class, Qualifier is null.
-         *
-         * <p>2.For @Autowire Field, Qualifier is not null. (Passed via {@link
-         * #initComponentClass(Class, String)} })
-         */
-        initComponentClass(componentClass, null);
+        // Create a bean
+        Object beanClassObject = initBeanClass(componentClass, null);
+
+        // TODO: Fix post-construct invocation order.
+
+        // Post Construct call.
+        ClassObjectUtils.invokePostConstruct(beanClassObject);
       }
     } catch (Exception ex) {
       throw new BeanInitiateException("Unable to Initiate Class", ex);
     }
   }
 
-  private static <T> Object initComponentClass(Class<T> componentClass, String qualifier)
-      throws InstantiationException, IllegalAccessException, NoSuchMethodException,
-          InvocationTargetException {
+  /**
+   * Initiates Bean Class.
+   *
+   * @param beanClass Bean Class to be initiated
+   * @param qualifier For @Autowire Field, Qualifier would be present, in case of multiple
+   *     implementations. For @Component Class, Qualifier is null.
+   * @param <T> Class Type
+   */
+  private static <T> Object initBeanClass(Class<T> beanClass, String qualifier) {
 
-    boolean isConstructorInjection = false;
+    boolean isOneConstructorInjectionDefined = false;
 
     // Used for class.newInstance(class[],objects[])
     List<Class<?>> argClassList = new LinkedList<>();
     List<Object> argObjectList = new ArrayList<>();
 
-    for (Constructor<?> constructor : componentClass.getConstructors()) {
+    for (Constructor<?> constructor : beanClass.getConstructors()) {
 
       // Fail if we have, more than 1 @Autowire Constructor.
-      if (isConstructorInjection) {
+      if (isOneConstructorInjectionDefined) {
         throw new IllegalArgumentException("Only supports 1 Autowire constructor.");
       }
 
       if (constructor.isAnnotationPresent(Autowire.class)) {
 
-        isConstructorInjection = true;
+        isOneConstructorInjectionDefined = true;
 
         for (Parameter field : constructor.getParameters()) {
           argClassList.add(field.getType());
@@ -98,39 +103,31 @@ public class CodekryptInjector {
                   : null;
 
           // Create object for this @Autowire Field.
-          Object fieldArgumentObject = initComponentClass(field.getType(), qualifierVal);
+          Object fieldArgumentObject = initBeanClass(field.getType(), qualifierVal);
           argObjectList.add(fieldArgumentObject);
         }
       }
     }
+    Object beanClassObject;
+    String beanClassName = beanClass.getName();
 
-    Object componentClassObject;
+    if (!isOneConstructorInjectionDefined) {
 
-    if (!isConstructorInjection) {
-
-      // 3.1 Here it will be interface, ie @Autowire Field. So we get the correct bean from the
-      // IoC container (based on qualifier if any).
-
-      // NOTE: It will create an instance if not present and add it to the IoC container.
-      componentClassObject =
-          beanManager.getBeanInstance(componentClass, componentClass.getName(), qualifier);
+      // 3.1 Here it will be interface, ie @Autowire Field Or a concrete class, with no constructor
+      // injection.
+      beanClassObject = beanManager.getBeanInstance(beanClass, beanClassName, qualifier);
 
     } else {
 
       // 3.2 Here it will be @Component class, with constructor injection.
-
-      // NOTE: Here we are explicitly adding the component instance to the IoC container.
-      componentClassObject =
-          componentClass
-              .getDeclaredConstructor(argClassList.toArray(new Class[0]))
-              .newInstance(argObjectList.toArray());
-
-      beanManager.addClassInstancesMapping(componentClass, componentClassObject);
+      beanClassObject =
+          beanManager.getBeanInstance(
+              beanClass, beanClassName, qualifier, argClassList, argObjectList);
     }
 
-    // 3.2 Autowire + recursion.
-    BeanOperationsUtils.invokeAutowire(beanManager, componentClass, componentClassObject);
+    // 4. Autowire + recursion.
+    ClassObjectUtils.invokeAutowire(beanManager, beanClass, beanClassObject);
 
-    return componentClassObject;
+    return beanClassObject;
   }
 }
